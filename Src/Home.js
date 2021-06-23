@@ -1,10 +1,21 @@
 import React, {useState} from 'react';
-import {View, TextInput, StyleSheet, ScrollView} from 'react-native';
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
 
 import {Component} from './Component';
 export const Home = () => {
   const [game, setGame] = useState('');
   const [searchData, setSearchData] = useState([]);
+  const [sortingData, setSortingData] = useState(true);
+  const [updatedData, setUpdatedData] = useState([]);
+
   const [data, setData] = useState([
     {
       title: 'LittleBigPlanet PS Vita',
@@ -702,6 +713,7 @@ export const Home = () => {
   ]);
 
   const search = text => {
+    console.log(data);
     let newData = [];
     for (let i = 0; i < data.length; i++) {
       let title = data[i].title.toLocaleLowerCase();
@@ -711,18 +723,36 @@ export const Home = () => {
     }
     setSearchData(newData);
   };
+
+  const FilterData = val => {
+    setSortingData(false);
+    const filterdata = data;
+    filterdata.sort((a, b) =>
+      a.platform.toLowerCase() > b.platform.toLowerCase() ? 1 : -1,
+    );
+
+    setUpdatedData(filterdata);
+  };
   return (
     <>
-      <TextInput
-        style={styles.textInput}
-        placeholder={'Search Game'}
-        onChangeText={text => {
-          setGame(text), search(text);
-        }}
-      />
+      <View style={styles.mainView}>
+        <TextInput
+          style={styles.textInput}
+          placeholder={'Search Game'}
+          onChangeText={text => {
+            setGame(text), search(text);
+          }}
+        />
+
+        <TouchableOpacity onPress={() => FilterData()} style={styles.imgView}>
+          <Image style={styles.img} source={require('./filter.png')} />
+        </TouchableOpacity>
+      </View>
+
       <ScrollView style={styles.view}>
-        {game.length >= 1
-          ? searchData.map((item, index) => {
+        {sortingData ? (
+          game.length >= 1 ? (
+            searchData.map((item, index) => {
               return (
                 <View style={styles.rootView}>
                   <Component name={'Title :-'} value={item.title} />
@@ -736,7 +766,28 @@ export const Home = () => {
                 </View>
               );
             })
-          : data.map((item, index) => {
+          ) : (
+            data.map((item, index) => {
+              return (
+                <View style={styles.rootView}>
+                  <Component name={'Title :-'} value={item.title} />
+                  <Component name={'platform :-'} value={item.platform} />
+                  <Component name={'score :-'} value={item.score} />
+                  <Component name={'genre :-'} value={item.genre} />
+                  <Component
+                    name={'editors_choice :-'}
+                    value={item.editors_choice}
+                  />
+                </View>
+              );
+            })
+          )
+        ) : (
+          <View>
+            <Text style={styles.title}>
+              Your Data is filter by platform name
+            </Text>
+            {updatedData.map((item, index) => {
               return (
                 <View style={styles.rootView}>
                   <Component name={'Title :-'} value={item.title} />
@@ -750,6 +801,8 @@ export const Home = () => {
                 </View>
               );
             })}
+          </View>
+        )}
       </ScrollView>
     </>
   );
@@ -767,15 +820,38 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     flex: 1,
   },
-  view: {
-    marginVertical: '10%',
-  },
+  view: {elevation: 5},
   textInput: {
     alignSelf: 'center',
     borderRadius: 25,
     borderWidth: 0.5,
-    width: '90%',
+    width: '75%',
     marginTop: '5%',
     paddingHorizontal: 20,
+    marginLeft: '3%',
+    backgroundColor: '#fff',
+    //height: '55%',
+  },
+  title: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    paddingTop: 20,
+  },
+  imgView: {
+    paddingLeft: 20,
+    width: '50%',
+    marginTop: '5%',
+    alignSelf: 'center',
+  },
+  img: {
+    width: '20%',
+    height: '45%',
+  },
+  mainView: {
+    width: '100%',
+    height: '12%',
+    backgroundColor: 'skyblue',
+    flexDirection: 'row',
   },
 });
